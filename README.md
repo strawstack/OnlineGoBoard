@@ -2,6 +2,14 @@
 
 A Go board at go.rhay.es for your teaching convenience. Place white and black stones. Add/remove stones. 9x9 grid. Default behavior is black/white alternating. Hold modifier keys to change behavior or press toggle buttons. Show board, and below a control area. Board top centre, controls float below.
 
+# Live Demo
+
+Try the [live demo](https://regularmemory.blog/OnlineGoBoard/)
+
+# Screenshot
+
+![](./screenshot.png)
+
 # Todo
 
 - [x] App state in JS object
