@@ -13,7 +13,6 @@ const SPACE = SIZE / (BOARD_SIZE + 1);
 
 // Global state
 let state = {
-    index: 0, // the move the user is looking at in moves array
     moves: [], // history of moves as [r, c, BLACK/WHITE]
     button_state: {
         color: BOTH, // BOTH / BLACK / WHITE
@@ -21,6 +20,8 @@ let state = {
     },
     preview: [undefined, undefined, undefined]
 };
+let undo_index = 0;
+let undo = [];
 
 function getState() {
     return state;
@@ -31,6 +32,15 @@ function setState(new_state) {
             state[prop] = new_state[prop];
         }
     }
+}
+function copyState() {
+    let new_state = {};
+    for (let prop in state) {
+        if (Object.prototype.hasOwnProperty.call(state, prop)) {
+            new_state[prop] = JSON.parse(JSON.stringify(state[prop]));
+        }
+    }
+    return new_state;
 }
 
 function clearStones() {
@@ -103,6 +113,12 @@ function bounds(r, c) {
     return r >= 1 && r <= 9 && c >= 1 && c <= 9;
 }
 
+function push_undo() {
+    undo = undo.slice(0, undo_index + 1);
+    undo.push(getState().moves.slice());
+    undo_index = undo.length - 1;
+}
+
 function main() {
 
     // Board scales to fix container and preserves
@@ -142,6 +158,7 @@ function main() {
         .attr("cy", d => d[0] * SPACE + SPACE)
         .attr("r", "4");
 
+    push_undo();
     render();
 
     // Stone add/remove click action
@@ -161,6 +178,7 @@ function main() {
             // Place stone of correct color
             if (!stoneExists(r, c)) {
                 new_state.moves.push([r, c, getTurn()]);
+                push_undo();
             }
 
         }
@@ -224,11 +242,23 @@ function main() {
     });
 
     d3.select(".btn-undo").on("mouseup", () => {
-
+        if (undo_index > 0) {
+            undo_index -= 1;
+            let new_state = getState();
+            new_state.moves = undo[undo_index];
+            setState(new_state);
+            render();
+        }
     });
 
     d3.select(".btn-redo").on("mouseup", () => {
-
+        if (undo_index < undo.length - 1) {
+            undo_index += 1;
+            let new_state = getState();
+            new_state.moves = undo[undo_index];
+            setState(new_state);
+            render();
+        }
     });
 }
 
