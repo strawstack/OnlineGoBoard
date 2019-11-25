@@ -18,3 +18,4 @@ Try the [live demo](https://regularmemory.blog/OnlineGoBoard/)
 - [x] Stone preview (with color) on hover
 - [x] Disable undo/redo when not possible
 - [x] Prompt to clear board on menu selection
+- [ ] Share page state with [TogetherJS](https://togetherjs.com/) 
