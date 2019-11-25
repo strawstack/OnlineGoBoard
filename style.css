@@ -61,12 +61,6 @@ i {
     color: inherit;
     color: #555;
 }
-.color-toggle {
-    display: none !important;
-}
-.color-toggle:nth-child(1) {
-    display: inline-block !important;
-}
 @media only screen and (max-width: 500px) {
     .btn {
         height: 40px;
@@ -90,4 +84,8 @@ i {
 }
 .preview {
     fill-opacity: 0.5;
+}
+.remove {
+    fill: red;
+    fill-opacity: 0.3;
 }

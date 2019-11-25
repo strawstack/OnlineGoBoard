@@ -1,7 +1,8 @@
 // Constants
-const BOTH = 0;
-const BLACK = 1;
-const WHITE = 2;
+const BOTH   = 0;
+const BLACK  = 1;
+const WHITE  = 2;
+const REMOVE = 3;
 const SIZE = 600;
 const BOARD_SIZE = 9;
 // SPACE
@@ -58,6 +59,9 @@ function render() {
     // Preview stone
     if (state.preview[0] != undefined) {
         let className = (state.preview[2] == BLACK)? "black" : "white";
+        if (state.preview[2] == REMOVE) {
+            className = "remove";
+        }
         let pStone = d3.select("svg").selectAll(".preview.stone" + "." + className)
             .data([state.preview])
             .enter().append("circle")
@@ -66,6 +70,17 @@ function render() {
             .attr("cy", d => d[0] * SPACE)
             .attr("r", SPACE/2);
     }
+
+    // Hide all color states
+    d3.selectAll(".color-toggle")
+    .style("display", "none");
+
+    // Show active color state
+    d3.select(`.color-toggle:nth-child(${state.button_state.color + 1})`)
+    .style("display", "inline-block");
+
+    // Toggle on Remove button
+    d3.select(".btn-remove>i").style("color", (state.button_state.remove)? "red": "#555");
 }
 
 function getTurn() {
@@ -100,6 +115,7 @@ function main() {
     let gridLines = [1, 2, 3, 4, 5, 6, 7, 8, 9];
     let gridPoints = [[2, 2], [6, 2], [4, 4], [2, 6], [6, 6]];
 
+    // Draw board
     let hLine = svg.selectAll(".hGrid-line")
         .data(gridLines)
         .enter().append("line")
@@ -128,7 +144,8 @@ function main() {
 
     render();
 
-    d3.select("svg").on("mouseup", e => {
+    // Stone add/remove click action
+    d3.select("svg").on("mouseup", () => {
         let [x, y] = d3.mouse(svg.node());
         let r = Math.floor((y - SPACE/2) / SPACE) + 1;
         let c = Math.floor((x - SPACE/2) / SPACE) + 1;
@@ -137,7 +154,7 @@ function main() {
         if (!bounds(r, c)) return;
 
         if (new_state.button_state.remove) { // Remove mode
-
+            new_state.moves = new_state.moves.filter(x => x[0] != r || x[1] != c);
 
         } else { // Play mode
 
@@ -152,7 +169,8 @@ function main() {
         render();
     });
 
-    d3.select("svg").on("mousemove", e => {
+    // Preview stone
+    d3.select("svg").on("mousemove", () => {
         let [x, y] = d3.mouse(svg.node());
         let r = Math.floor((y - SPACE/2) / SPACE) + 1;
         let c = Math.floor((x - SPACE/2) / SPACE) + 1;
@@ -166,17 +184,50 @@ function main() {
         }
 
         if (!stoneExists(r, c)) { // Show stone preview
-            new_state.preview = [r, c, getTurn()];
+            if (!new_state.button_state.remove) {
+                new_state.preview = [r, c, getTurn()];
+            }
 
         } else {
-            // Show remove highlight, or black/white stone
-
+            // Show remove highlight
+            if (new_state.button_state.remove) {
+                new_state.preview = [r, c, REMOVE];
+            }
         }
 
         setState(new_state);
         render();
+    });
 
-        // TODO - Highlight should ignore clicks
+    // Control buttons
+    d3.select(".btn-color").on("mouseup", () => {
+        let new_state = getState();
+        new_state.button_state.color = (new_state.button_state.color + 1) % 3;
+        setState(new_state);
+        render();
+    });
+
+    d3.select(".btn-remove").on("mouseup", () => {
+        let new_state = getState();
+        new_state.button_state.remove = !new_state.button_state.remove;
+        setState(new_state);
+        render();
+    });
+
+    d3.select(".btn-clear").on("mouseup", () => {
+        if (confirm("Reset game?")) {
+            let new_state = getState();
+            new_state.moves = [];
+            setState(new_state);
+            render();
+        }
+    });
+
+    d3.select(".btn-undo").on("mouseup", () => {
+
+    });
+
+    d3.select(".btn-redo").on("mouseup", () => {
 
     });
 }
