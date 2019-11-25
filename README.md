@@ -1,6 +1,6 @@
 # Online Go Board
 
-A Go board at go.rhay.es for your teaching convenience. Place white and black stones. Add/remove stones. 9x9 grid. Default behavior is black/white alternating. Hold modifier keys to change behavior or press toggle buttons. Show board, and below a control area. Board top centre, controls float below.
+An interactive Go board with the ability to add/remove stones, optional alternating turn colour, undo/redo functionality, and a clear all button!
 
 # Live Demo
 
