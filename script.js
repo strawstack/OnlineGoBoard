@@ -13,7 +13,6 @@ const SPACE = SIZE / (BOARD_SIZE + 1);
 
 // Global state
 let state = {
-    moves: [], // history of moves as [r, c, BLACK/WHITE]
     button_state: {
         color: BOTH, // BOTH / BLACK / WHITE
         remove: false
@@ -21,7 +20,7 @@ let state = {
     preview: [undefined, undefined, undefined]
 };
 let undo_index = 0;
-let undo = [];
+let undo = []; // List of moves states. Each move is a tuple [r, c, BLACK/WHITE]
 
 function getState() {
     return state;
@@ -47,11 +46,15 @@ function clearStones() {
     d3.selectAll(".stone").remove();
 }
 
+function moves() {
+    return undo[undo_index];
+}
+
 function render() {
     clearStones();
 
     let bStone = d3.select("svg").selectAll(".black.stone")
-        .data(state.moves.filter(x => x[2] == BLACK))
+        .data(moves().filter(x => x[2] == BLACK))
         .enter().append("circle")
         .attr("class", "black stone")
         .attr("cx", d => d[1] * SPACE)
@@ -59,7 +62,7 @@ function render() {
         .attr("r", SPACE/2);
 
     let wStone = d3.select("svg").selectAll(".white.stone")
-        .data(state.moves.filter(x => x[2] == WHITE))
+        .data(moves().filter(x => x[2] == WHITE))
         .enter().append("circle")
         .attr("class", "white stone")
         .attr("cx", d => d[1] * SPACE)
@@ -91,13 +94,29 @@ function render() {
 
     // Toggle on Remove button
     d3.select(".btn-remove>i").style("color", (state.button_state.remove)? "red": "#555");
+
+    // Disable undo/redo
+    d3.select(".btn-undo").style("color", "#555")
+        .style("opacity", 1)
+        .style("cursor", "normal");
+
+    d3.select(".btn-redo").style("color", "#555")
+        .style("opacity", 1)
+        .style("cursor", "normal");
+
+    if (undo_index <= 0) {
+        d3.select(".btn-undo").style("opacity", 0.2).style("cursor", "not-allowed");
+    }
+    if (undo_index >= undo.length - 1) {
+        d3.select(".btn-redo").style("opacity", 0.2).style("cursor", "not-allowed");
+    }
 }
 
 function getTurn() {
     let new_state = getState();
     if (new_state.button_state.color == BOTH) {
-        if (new_state.moves.length == 0) return BLACK;
-        return (new_state.moves[new_state.moves.length - 1][2] == BLACK)? WHITE : BLACK;
+        if (moves().length == 0) return BLACK;
+        return (moves()[moves().length - 1][2] == BLACK)? WHITE : BLACK;
 
     } else {
         return new_state.button_state.color;
@@ -106,16 +125,16 @@ function getTurn() {
 }
 
 function stoneExists(r, c) {
-    return state.moves.filter(x => x[0] == r && x[1] == c).length != 0;
+    return moves().filter(x => x[0] == r && x[1] == c).length != 0;
 }
 
 function bounds(r, c) {
     return r >= 1 && r <= 9 && c >= 1 && c <= 9;
 }
 
-function push_undo() {
+function push_undo(moveList) {
     undo = undo.slice(0, undo_index + 1);
-    undo.push(getState().moves.slice());
+    undo.push(JSON.parse(JSON.stringify(moveList)));
     undo_index = undo.length - 1;
 }
 
@@ -158,7 +177,7 @@ function main() {
         .attr("cy", d => d[0] * SPACE + SPACE)
         .attr("r", "4");
 
-    push_undo();
+    push_undo([]);
     render();
 
     // Stone add/remove click action
@@ -171,19 +190,19 @@ function main() {
         if (!bounds(r, c)) return;
 
         if (new_state.button_state.remove) { // Remove mode
-            new_state.moves = new_state.moves.filter(x => x[0] != r || x[1] != c);
+            let moveList = moves().filter(x => x[0] != r || x[1] != c);
+            push_undo(moveList);
 
         } else { // Play mode
 
             // Place stone of correct color
             if (!stoneExists(r, c)) {
-                new_state.moves.push([r, c, getTurn()]);
-                push_undo();
+                let moveList = JSON.parse(JSON.stringify(moves()));
+                moveList.push([r, c, getTurn()]);
+                push_undo(moveList);
             }
-
         }
 
-        setState(new_state);
         render();
     });
 
@@ -235,7 +254,10 @@ function main() {
     d3.select(".btn-clear").on("mouseup", () => {
         if (confirm("Reset game?")) {
             let new_state = getState();
-            new_state.moves = [];
+            undo_index = 0;
+            undo = [[]];
+            new_state.button_state.remove = false;
+            new_state.button_state.color  = BOTH;
             setState(new_state);
             render();
         }
@@ -244,9 +266,6 @@ function main() {
     d3.select(".btn-undo").on("mouseup", () => {
         if (undo_index > 0) {
             undo_index -= 1;
-            let new_state = getState();
-            new_state.moves = undo[undo_index];
-            setState(new_state);
             render();
         }
     });
@@ -254,9 +273,6 @@ function main() {
     d3.select(".btn-redo").on("mouseup", () => {
         if (undo_index < undo.length - 1) {
             undo_index += 1;
-            let new_state = getState();
-            new_state.moves = undo[undo_index];
-            setState(new_state);
             render();
         }
     });
