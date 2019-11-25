@@ -8,7 +8,7 @@ Try the [live demo](https://regularmemory.blog/OnlineGoBoard/)
 
 # Screenshot
 
-![](./screenshot.png)
+[![](./screenshot.png)](https://regularmemory.blog/OnlineGoBoard/)
 
 # Todo
 
