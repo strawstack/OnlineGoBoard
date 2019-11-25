@@ -1,0 +1,93 @@
+html, body {
+    padding: 0px;
+    margin: 0px;
+    height: 100%;
+    background: url(background.svg);
+}
+/* Page */
+.page-area {
+    display: grid;
+    grid-template-columns: 1fr minmax(0px, 700px) 1fr;
+    height: 100%;
+}
+.content-area {
+    grid-column: 2 / 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+}
+
+/* Board */
+.go-board-area {
+    width: 100%;
+}
+svg {
+    width: 100%;
+    height: auto;
+}
+.hGrid-line, .vGrid-line {
+    stroke: #555;
+    stroke-width: 2px;
+    stroke-linecap: round;
+}
+.grid-point {
+    fill: #555;
+}
+
+/* Control */
+.control-area {
+    width: 90%;
+    height: 100px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+.btn {
+    height: 60px;
+    width: 60px;
+    border: 2px solid #555;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+}
+.btn:hover {
+    background: white;
+    cursor: pointer;
+}
+i {
+    font-size: 2.7em;
+    color: inherit;
+    color: #555;
+}
+.color-toggle {
+    display: none !important;
+}
+.color-toggle:nth-child(1) {
+    display: inline-block !important;
+}
+@media only screen and (max-width: 500px) {
+    .btn {
+        height: 40px;
+        width: 40px;
+    }
+    i {
+        font-size: 2em;
+    }
+}
+
+/* Stones */
+.stone {
+
+}
+.black {
+    fill: #555;
+}
+.white {
+    fill: white;
+    stroke-width: 4px;
+}
+.preview {
+    fill-opacity: 0.5;
+}
