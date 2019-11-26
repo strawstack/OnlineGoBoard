@@ -57,6 +57,7 @@ function render() {
         .data(moves().filter(x => x[2] == BLACK))
         .enter().append("circle")
         .attr("class", "black stone")
+        .attr("id", d => `"black-stone-${d[1]}-${d[0]}"`)
         .attr("cx", d => d[1] * SPACE)
         .attr("cy", d => d[0] * SPACE)
         .attr("r", SPACE/2);
@@ -65,6 +66,7 @@ function render() {
         .data(moves().filter(x => x[2] == WHITE))
         .enter().append("circle")
         .attr("class", "white stone")
+        .attr("id", d => `"white-stone-${d[1]}-${d[0]}"`)
         .attr("cx", d => d[1] * SPACE)
         .attr("cy", d => d[0] * SPACE)
         .attr("r", SPACE/2);
@@ -79,6 +81,7 @@ function render() {
             .data([state.preview])
             .enter().append("circle")
             .attr("class", "preview stone " + className)
+            .attr("id", d => `"go-board-area"`)
             .attr("cx", d => d[1] * SPACE)
             .attr("cy", d => d[0] * SPACE)
             .attr("r", SPACE/2);
@@ -138,6 +141,16 @@ function push_undo(moveList) {
     undo_index = undo.length - 1;
 }
 
+// TogetherJS
+function msg() {
+    TogetherJS.send({
+        type: "stateChange",
+        button_state: getState().button_state,
+        undo: undo,
+        undo_index: undo_index
+    });
+}
+
 function main() {
 
     // Board scales to fix container and preserves
@@ -155,6 +168,7 @@ function main() {
         .data(gridLines)
         .enter().append("line")
         .attr("class", "hGrid-line")
+        .attr("id", d => `"hGrid-line-${d}"`)
         .attr("x1", SPACE)
         .attr("y1", d => d * SPACE)
         .attr("x2", SIZE - SPACE)
@@ -164,6 +178,7 @@ function main() {
         .data(gridLines)
         .enter().append("line")
         .attr("class", "vGrid-line")
+        .attr("id", d => `"vGrid-line-${d}"`)
         .attr("x1", d => d * SPACE)
         .attr("y1", SPACE)
         .attr("x2", d => d * SPACE)
@@ -173,6 +188,7 @@ function main() {
         .data(gridPoints)
         .enter().append("circle")
         .attr("class", "grid-point")
+        .attr("id", d => `"grid-point-${d[1]}-${d[0]}"`)
         .attr("cx", d => d[1] * SPACE + SPACE)
         .attr("cy", d => d[0] * SPACE + SPACE)
         .attr("r", "4");
@@ -200,6 +216,7 @@ function main() {
                 let moveList = JSON.parse(JSON.stringify(moves()));
                 moveList.push([r, c, getTurn()]);
                 push_undo(moveList);
+                msg(); // TogetherJS
             }
         }
 
@@ -275,6 +292,12 @@ function main() {
             undo_index += 1;
             render();
         }
+    });
+
+    // TogetherJS
+    TogetherJS.hub.on("stateChange", function (msg) {
+        console.log("msg received");
+        console.log(msg);
     });
 }
 
