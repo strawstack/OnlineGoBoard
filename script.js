@@ -22,6 +22,20 @@ let state = {
 let undo_index = 0;
 let undo = []; // List of moves states. Each move is a tuple [r, c, BLACK/WHITE]
 
+// PeerJS connection object: conn.send('hello');
+let conn = undefined;
+let connOpen = false;
+
+function msg() {
+    if (!connOpen) return;
+    let data = {
+        "button_state": getState().button_state,
+        "undo_index": undo_index,
+        "undo": undo
+    };
+    conn.send(JSON.stringify(data));
+}
+
 function getState() {
     return state;
 }
@@ -81,7 +95,6 @@ function render() {
             .data([state.preview])
             .enter().append("circle")
             .attr("class", "preview stone " + className)
-            .attr("id", d => `"go-board-area"`)
             .attr("cx", d => d[1] * SPACE)
             .attr("cy", d => d[0] * SPACE)
             .attr("r", SPACE/2);
@@ -141,16 +154,6 @@ function push_undo(moveList) {
     undo_index = undo.length - 1;
 }
 
-// TogetherJS
-function msg() {
-    TogetherJS.send({
-        type: "stateChange",
-        button_state: getState().button_state,
-        undo: undo,
-        undo_index: undo_index
-    });
-}
-
 function main() {
 
     // Board scales to fix container and preserves
@@ -208,6 +211,7 @@ function main() {
         if (new_state.button_state.remove) { // Remove mode
             let moveList = moves().filter(x => x[0] != r || x[1] != c);
             push_undo(moveList);
+            msg();
 
         } else { // Play mode
 
@@ -216,7 +220,7 @@ function main() {
                 let moveList = JSON.parse(JSON.stringify(moves()));
                 moveList.push([r, c, getTurn()]);
                 push_undo(moveList);
-                msg(); // TogetherJS
+                msg();
             }
         }
 
@@ -259,6 +263,7 @@ function main() {
         new_state.button_state.color = (new_state.button_state.color + 1) % 3;
         setState(new_state);
         render();
+        msg();
     });
 
     d3.select(".btn-remove").on("mouseup", () => {
@@ -266,6 +271,7 @@ function main() {
         new_state.button_state.remove = !new_state.button_state.remove;
         setState(new_state);
         render();
+        msg();
     });
 
     d3.select(".btn-clear").on("mouseup", () => {
@@ -277,6 +283,7 @@ function main() {
             new_state.button_state.color  = BOTH;
             setState(new_state);
             render();
+            msg();
         }
     });
 
@@ -284,6 +291,7 @@ function main() {
         if (undo_index > 0) {
             undo_index -= 1;
             render();
+            msg();
         }
     });
 
@@ -291,13 +299,61 @@ function main() {
         if (undo_index < undo.length - 1) {
             undo_index += 1;
             render();
+            msg();
         }
     });
 
-    // TogetherJS
-    TogetherJS.hub.on("stateChange", function (msg) {
-        console.log("msg received");
-        console.log(msg);
+    // Multiplayer
+    let btnConnect = d3.select(".btn-connect");
+    let peerIdArea = d3.select(".peer-id-area");
+    let peerID = d3.select("#peer-id");
+    let connectFriend = d3.select(".connect-with-friend");
+    let friendLabel = d3.select(".friend-id-label");
+    let friendInput = d3.select("#friend-peer-id");
+    let btnPeerConnect = d3.select(".btn-peer-connect");
+    let statusMsg = d3.select(".status-msg");
+    let friendArea = d3.select(".friend-area");
+
+    var peer;
+    btnConnect.on("mouseup", () => {
+        btnConnect.style("display", "none");
+        friendArea.style("display", "block");
+        peer = new Peer();
+        peer.on('open', function(id) {
+            peerID.text(id);
+        });
+        peer.on('connection', function(conn) {
+            conn.on('data', function(data) {
+                // Receive state
+                let obj = JSON.parse(data);
+                let newState = getState();
+                newState.button_state.color = obj.button_state.color;
+                newState.button_state.remove = obj.button_state.remove;
+                setState(newState);
+                while (undo.length > 0) { // Clear undo
+                    undo.pop();
+                }
+                for (let item of obj.undo) { // Push new undo
+                    undo.push(item);
+                }
+                undo_index = obj.undo_index;
+                render();
+            });
+        });
+    });
+
+    btnPeerConnect.on("mouseup", () => {
+        let otherid = friendInput.node().value;
+        if (otherid != "") {
+            conn = peer.connect(otherid);
+            conn.on('open', function() {
+                connOpen = true;
+                console.log("conn open");
+                statusMsg.text("You're connected to: " + otherid);
+            });
+        } else {
+            statusMsg.text("Friend's PeerID cannot be empty string");
+        }
     });
 }
 

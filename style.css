@@ -3,6 +3,9 @@ html, body {
     margin: 0px;
     height: 100%;
     background: url(background.svg);
+    font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+    font-weight: 300;
+    color: #555;
 }
 /* Page */
 .page-area {
@@ -88,4 +91,39 @@ i {
 .remove {
     fill: red;
     fill-opacity: 0.3;
+}
+
+/* Multiplayer */
+.multiplayer-title {
+    font-weight: bold;
+    font-size: 1.7em;
+}
+.multiplayer-area {
+    width: 90%;
+    margin-top: 50px;
+    margin-bottom: 100px;
+    font-size: 1.5em;
+}
+.m-btn {
+    display: inline-block;
+    padding: 10px 15px;
+    margin: 10px 0px;
+    cursor: pointer;
+    border: 2px solid #555;
+}
+.m-btn:hover{
+    background: white;
+}
+.friend-area {
+    display: none;
+}
+#friend-peer-id {
+    font-size: 0.5em;
+}
+.status-msg {
+    padding: 3px 10px 3px 10px;
+    border: 2px solid #555;
+}
+#peer-id {
+    font-weight: bold;
 }

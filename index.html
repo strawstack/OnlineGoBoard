@@ -6,13 +6,12 @@
     <script src="script.js"></script>
     <script src="https://kit.fontawesome.com/0033d354dd.js" crossorigin="anonymous"></script>
     <script src="https://d3js.org/d3.v5.js"></script>
-    <script src="https://togetherjs.com/togetherjs-min.js"></script>
+    <script src="https://unpkg.com/peerjs@1.0.0/dist/peerjs.min.js"></script>
 </head>
 <body>
 <div id="page-area" class="page-area">
     <div id="content-area" class="content-area">
         <div id="go-board-area" class="go-board-area">
-            <div id="go-board-area" class="fakePreviewStone"></div>
         </div>
         <div id="control-area" class="control-area">
             <div id="btn-color" class="btn btn-color">
@@ -24,6 +23,21 @@
             <div id="btn-redo" class="btn btn-redo"><i class="fas fa-chevron-right"></i></div>
             <div id="btn-remove" class="btn btn-remove"><i class="far fa-times-circle"></i></div>
             <div id="btn-clear" class="btn btn-clear"><i class="fas fa-sync-alt"></i></div>
+        </div>
+        <div class="multiplayer-area">
+            <div class="multiplayer-title">Multiplayer</div>
+            <div class="m-btn btn-connect">Connect</div>
+            <div class="friend-area">
+                <div>
+                    <span class="peer-id-area">Your PeerID is: <span id="peer-id"></span></span>
+                </div>
+                <div>
+                    <span class="friend-id-label">Enter friend's PeerID:</span>
+                    <input id="friend-peer-id" type="text">
+                </div>
+                <div class="m-btn btn-peer-connect">Connect</div>
+                <div class="status-msg">Enter a friend's PeerID and press Connect.</div>
+            </div>
         </div>
     </div>
 </div>
