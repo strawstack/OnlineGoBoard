@@ -4,11 +4,11 @@ An interactive Go board with the ability to add/remove stones, optional alternat
 
 # Live Demo
 
-Try the [live demo](https://regularmemory.blog/OnlineGoBoard/)
+Try the [live demo](https://strawstack.github.io/OnlineGoBoard/)
 
 # Screenshot
 
-[![](./screenshot.png)](https://regularmemory.blog/OnlineGoBoard/)
+[![](./screenshot.png)](https://strawstack.github.io/OnlineGoBoard/)
 
 # Todo
 
